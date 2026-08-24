@@ -3,6 +3,9 @@ import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { IssueReferencePill } from "@/components/IssueReferencePill";
+import { XoiCaseMap } from "@/components/XoiCaseMap";
+import { XoiCamundaRuntime, type XoiCamundaRuntimeValue } from "@/components/XoiCamundaRuntime";
+import { XoiCmmnModel, type XoiCmmnModelValue } from "@/components/XoiCmmnModel";
 import { Link, useCaseHref } from "@/lib/router";
 import { copyTextToClipboard } from "@/lib/clipboard";
 import { cn } from "@/lib/utils";
@@ -32,6 +35,10 @@ function isIssueIdentifierField(fieldKey: string | undefined): boolean {
   if (!fieldKey) return false;
   const normalized = fieldKey.toLowerCase().replace(/[^a-z0-9]/g, "");
   return normalized.includes("issueidentifier") || normalized.includes("taskidentifier");
+}
+
+function normalizedFieldKey(fieldKey: string | undefined): string {
+  return fieldKey?.toLowerCase().replace(/[^a-z0-9]/g, "") ?? "";
 }
 
 function stringifyCopyValue(value: unknown): string {
@@ -165,6 +172,15 @@ export function CaseFieldValue({
   variant?: "compact" | "full";
 }) {
   if (value === null || value === undefined) return <EmptyValue />;
+
+  const key = normalizedFieldKey(fieldKey);
+  if (key === "xoicasemap") return <XoiCaseMap value={value} />;
+  if (key === "xoicamundaruntime" && isPlainObject(value)) {
+    return <XoiCamundaRuntime value={value as XoiCamundaRuntimeValue} />;
+  }
+  if (key === "xoicmmnmodel" && isPlainObject(value)) {
+    return <XoiCmmnModel value={value as XoiCmmnModelValue} />;
+  }
 
   const issueIdentifiers = extractIssueIdentifiers(value, fieldKey);
   if (issueIdentifiers.length > 0) return <IssueIdentifierValue identifiers={issueIdentifiers} />;
